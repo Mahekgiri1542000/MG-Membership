@@ -1,0 +1,307 @@
+/* =========================================================================
+   MG Membership – admin design system (scoped to body.mgm-admin)
+   ========================================================================= */
+body.mgm-admin {
+	--m-surface: #ffffff;
+	--m-canvas: #f6f7f9;
+	--m-border: #e3e5e8;
+	--m-border-strong: #d0d5dd;
+	--m-grid: #eef0f2;
+	--m-ink: #101828;
+	--m-ink-2: #475467;
+	--m-ink-3: #667085;
+	--m-accent: #4f46e5;
+	--m-accent-hover: #4338ca;
+	--m-accent-soft: rgba(79, 70, 229, .08);
+	--m-accent-ring: rgba(79, 70, 229, .25);
+	--m-good: #067647;
+	--m-good-bg: #ecfdf3;
+	--m-warn: #b54708;
+	--m-warn-bg: #fffaeb;
+	--m-crit: #b42318;
+	--m-crit-bg: #fef3f2;
+	--m-radius: 12px;
+	--m-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+	background: #f0f0f1;
+}
+body.mgm-admin .mgm-wrap { max-width: 1320px; color: var(--m-ink); }
+body.mgm-admin .mgm-wrap *, body.mgm-admin .mgm-wrap *::before, body.mgm-admin .mgm-wrap *::after { box-sizing: border-box; }
+body.mgm-admin .mgm-muted { color: var(--m-ink-3); }
+body.mgm-admin .mgm-wrap a:focus-visible, body.mgm-admin .mgm-wrap button:focus-visible, body.mgm-admin .mgm-wrap input:focus-visible, body.mgm-admin .mgm-wrap select:focus-visible { outline: 2px solid var(--m-accent); outline-offset: 2px; box-shadow: none; }
+
+/* ---------- Page header ---------- */
+.mgm-page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 20px 0 20px; }
+.mgm-page-head-text { min-width: 0; }
+.mgm-eyebrow { display: inline-block; margin: 0 0 4px; color: var(--m-ink-3); font-size: 13px; font-weight: 500; text-decoration: none; }
+a.mgm-back { color: var(--m-ink-2); }
+a.mgm-back:hover { color: var(--m-accent); }
+body.mgm-admin .mgm-page-title { margin: 0; padding: 0; font-size: 26px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em; color: var(--m-ink); }
+.mgm-page-desc { margin: 4px 0 0; color: var(--m-ink-2); font-size: 14px; max-width: 70ch; }
+.mgm-page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+body.mgm-admin .wp-header-end { visibility: hidden; margin: -2px 0 0; }
+body.mgm-admin .notice.mgm-notice { border-radius: 10px; border: 1px solid #abefc6; border-left-width: 4px; border-left-color: var(--m-good); box-shadow: none; margin: 0 0 16px; }
+
+/* ---------- Buttons ---------- */
+.mgm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--m-border-strong); background: var(--m-surface); color: var(--m-ink) !important; font-size: 14px; font-weight: 600; line-height: 1; text-decoration: none; box-shadow: var(--m-shadow); cursor: pointer; transition: background .15s, border-color .15s, color .15s; white-space: nowrap; }
+.mgm-btn:hover { background: var(--m-canvas); border-color: var(--m-ink-3); }
+.mgm-btn .dashicons { font-size: 17px; width: 17px; height: 17px; }
+.mgm-btn-primary { background: var(--m-accent); border-color: var(--m-accent); color: #fff !important; }
+.mgm-btn-primary:hover { background: var(--m-accent-hover); border-color: var(--m-accent-hover); }
+.mgm-btn-sm { height: 30px; padding: 0 10px; font-size: 13px; border-radius: 7px; }
+.mgm-btn-danger { color: var(--m-crit) !important; border-color: #fecdca; }
+.mgm-btn-danger:hover { background: var(--m-crit-bg); border-color: var(--m-crit); }
+.mgm-btn-ghost-danger { border-color: transparent; box-shadow: none; background: transparent; color: var(--m-ink-3) !important; }
+.mgm-btn-ghost-danger:hover { color: var(--m-crit) !important; background: var(--m-crit-bg); border-color: transparent; }
+body.mgm-admin .button.mgm-btn-submit, body.mgm-admin .mgm-wrap .button-primary { background: var(--m-accent); border-color: var(--m-accent); border-radius: 8px; min-height: 38px; padding: 0 18px; font-weight: 600; box-shadow: var(--m-shadow); }
+body.mgm-admin .button.mgm-btn-submit:hover, body.mgm-admin .mgm-wrap .button-primary:hover { background: var(--m-accent-hover); border-color: var(--m-accent-hover); }
+body.mgm-admin .mgm-wrap .button:not(.button-primary):not(.button-link) { border-radius: 8px; min-height: 34px; border-color: var(--m-border-strong); color: var(--m-ink); background: var(--m-surface); }
+body.mgm-admin .mgm-wrap .button:not(.button-primary):not(.button-link):hover { background: var(--m-canvas); }
+
+/* ---------- Cards ---------- */
+.mgm-card, .mgm-panel { background: var(--m-surface); border: 1px solid var(--m-border); border-radius: var(--m-radius); padding: 20px; box-shadow: var(--m-shadow); margin: 0 0 16px; }
+.mgm-panel h2, .mgm-card-title { font-size: 15px !important; font-weight: 600; margin: 0 0 14px !important; color: var(--m-ink); }
+.mgm-card-flush { padding: 0; overflow: hidden; }
+.mgm-card-flush > .mgm-card-title { padding: 18px 20px 0; }
+.mgm-card-flush .mgm-table-card { border: 0; border-top: 1px solid var(--m-border); border-radius: 0; box-shadow: none; margin: 14px 0 0; }
+.mgm-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+.mgm-grid-2 > * { margin-bottom: 0; }
+.mgm-grid-2 + * { margin-top: 16px; }
+
+/* ---------- Toolbar, tabs, filters ---------- */
+.mgm-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; }
+.mgm-tabs { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #e8eaee; border-radius: 10px; padding: 3px; }
+.mgm-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; color: var(--m-ink-2); font-weight: 600; font-size: 13px; text-decoration: none; }
+.mgm-tabs a:hover { color: var(--m-ink); }
+.mgm-tabs a.is-active { background: var(--m-surface); color: var(--m-ink); box-shadow: 0 1px 3px rgba(16, 24, 40, .12); }
+.mgm-count { min-width: 20px; padding: 1px 6px; border-radius: 99px; background: rgba(16, 24, 40, .07); font-size: 11px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
+.mgm-tabs a.is-active .mgm-count { background: var(--m-accent-soft); color: var(--m-accent); }
+.mgm-filter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; }
+.mgm-filter-label { font-weight: 600; color: var(--m-ink-2); }
+body.mgm-admin .mgm-filter select, body.mgm-admin .mgm-filter input[type=search], body.mgm-admin .mgm-filter input[type=date] { height: 36px; border-radius: 8px; border-color: var(--m-border-strong); box-shadow: none; }
+body.mgm-admin .mgm-filter select:focus, body.mgm-admin .mgm-filter input:focus { border-color: var(--m-accent); box-shadow: 0 0 0 3px var(--m-accent-ring); }
+.mgm-search { position: relative; display: inline-flex; }
+.mgm-search .dashicons { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--m-ink-3); font-size: 17px; width: 17px; height: 17px; pointer-events: none; }
+body.mgm-admin .mgm-search input[type=search] { padding-left: 32px; width: 260px; max-width: 100%; }
+body.mgm-admin .mgm-filter .button { height: 36px; }
+
+/* ---------- Tables ---------- */
+.mgm-table-card { background: var(--m-surface); border: 1px solid var(--m-border); border-radius: var(--m-radius); box-shadow: var(--m-shadow); overflow-x: auto; margin: 0 0 16px; }
+body.mgm-admin table.mgm-table { border: 0; box-shadow: none; border-collapse: collapse; width: 100%; background: transparent; }
+body.mgm-admin table.mgm-table thead th { background: var(--m-canvas); color: var(--m-ink-3); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 10px 14px; border-bottom: 1px solid var(--m-border); white-space: nowrap; }
+body.mgm-admin table.mgm-table td { padding: 12px 14px; border-bottom: 1px solid var(--m-grid); vertical-align: middle; color: var(--m-ink-2); font-size: 13px; }
+body.mgm-admin table.mgm-table tbody tr:last-child td { border-bottom: 0; }
+body.mgm-admin table.mgm-table tbody tr:hover td { background: #fafbfc; }
+body.mgm-admin table.mgm-table td strong { color: var(--m-ink); }
+body.mgm-admin table.mgm-table td code { background: var(--m-canvas); border-radius: 5px; padding: 2px 6px; font-size: 12px; }
+body.mgm-admin table.mgm-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.mgm-row-actions, td.mgm-actions { text-align: right; white-space: nowrap; }
+.mgm-row-actions .mgm-btn + .mgm-btn, td.mgm-actions .mgm-btn + .mgm-btn { margin-left: 4px; }
+.mgm-person { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 200px; }
+.mgm-person strong { display: block; color: var(--m-ink); }
+.mgm-person small { display: block; color: var(--m-ink-3); }
+.mgm-person:hover strong { color: var(--m-accent); }
+img.mgm-avatar { border-radius: 50%; flex: 0 0 auto; }
+.mgm-chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 6px; background: var(--m-accent-soft); color: var(--m-accent); font-size: 12px; font-weight: 600; }
+body.mgm-admin tr.mgm-empty-row td { text-align: center; padding: 40px 16px; }
+tr.mgm-empty-row .dashicons { display: block; margin: 0 auto 8px; font-size: 28px; width: 28px; height: 28px; color: var(--m-ink-3); }
+tr.mgm-empty-row strong { display: block; font-size: 14px; }
+tr.mgm-empty-row span:last-child { display: block; color: var(--m-ink-3); margin-top: 2px; }
+body.mgm-admin .mgm-wrap .tablenav { height: auto; margin: 0 0 16px; }
+body.mgm-admin .mgm-wrap .tablenav-pages .page-numbers { display: inline-flex; min-width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--m-border); background: var(--m-surface); text-decoration: none; margin-left: 4px; color: var(--m-ink-2); }
+body.mgm-admin .mgm-wrap .tablenav-pages .page-numbers.current { background: var(--m-accent); border-color: var(--m-accent); color: #fff; }
+
+/* ---------- Status pills ---------- */
+.mgm-status { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; background: #f2f4f7; color: #344054; white-space: nowrap; }
+.mgm-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .8; }
+.mgm-status-active, .mgm-status-complete, .mgm-status-trialing { background: var(--m-good-bg); color: var(--m-good); }
+.mgm-status-pending, .mgm-status-suspended { background: var(--m-warn-bg); color: var(--m-warn); }
+.mgm-status-cancelled, .mgm-status-failed, .mgm-status-refunded, .mgm-status-expired { background: var(--m-crit-bg); color: var(--m-crit); }
+
+/* ---------- Member profile ---------- */
+.mgm-profile { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mgm-profile-main { flex: 1 1 220px; display: flex; flex-direction: column; gap: 2px; }
+.mgm-profile-main strong { font-size: 15px; }
+.mgm-profile-main span { color: var(--m-ink-3); }
+.mgm-profile-stats { display: flex; gap: 28px; margin: 0; flex-wrap: wrap; }
+.mgm-profile-stats dt { color: var(--m-ink-3); font-size: 12px; font-weight: 500; }
+.mgm-profile-stats dd { margin: 2px 0 0; font-size: 18px; font-weight: 700; color: var(--m-ink); font-variant-numeric: tabular-nums; }
+.mgm-access-list { list-style: none; margin: 0; padding: 0; }
+.mgm-access-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--m-grid); margin: 0; }
+.mgm-access-list li:first-child { border-top: 0; padding-top: 0; }
+.mgm-access-name strong { display: block; }
+.mgm-access-name small { color: var(--m-ink-3); }
+
+/* ---------- New transaction form ---------- */
+body.mgm-admin .mgm-new-txn .form-table th { padding-left: 0; width: 220px; }
+body.mgm-admin .mgm-new-txn .form-table td { padding-right: 0; }
+
+/* ---------- Settings ---------- */
+.mgm-settings { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+.mgm-settings-nav { position: sticky; top: 52px; display: flex; flex-direction: column; gap: 4px; background: var(--m-surface); border: 1px solid var(--m-border); border-radius: var(--m-radius); padding: 8px; box-shadow: var(--m-shadow); }
+.mgm-settings-nav a { display: flex; gap: 10px; align-items: flex-start; padding: 10px; border-radius: 8px; text-decoration: none; color: var(--m-ink-2); }
+.mgm-settings-nav a:hover { background: var(--m-canvas); color: var(--m-ink); }
+.mgm-settings-nav a.is-active { background: var(--m-accent-soft); color: var(--m-accent); }
+.mgm-settings-nav .dashicons { margin-top: 1px; }
+.mgm-settings-nav strong { display: block; font-size: 14px; }
+.mgm-settings-nav small { display: block; color: var(--m-ink-3); font-size: 12px; line-height: 1.4; margin-top: 1px; }
+.mgm-settings-main { min-width: 0; }
+.mgm-fields-grid { display: flex; flex-direction: column; }
+.mgm-field-row { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 8px 24px; padding: 14px 0; border-top: 1px solid var(--m-grid); align-items: start; }
+.mgm-field-row:first-child { border-top: 0; padding-top: 0; }
+.mgm-field-label { font-weight: 600; color: var(--m-ink); padding-top: 7px; }
+.mgm-field-control { min-width: 0; }
+body.mgm-admin .mgm-field-control input[type=text], body.mgm-admin .mgm-field-control input[type=password], body.mgm-admin .mgm-field-control input[type=number], body.mgm-admin .mgm-field-control input[type=email], body.mgm-admin .mgm-field-control input[type=url], body.mgm-admin .mgm-field-control select, body.mgm-admin .mgm-field-control textarea { width: 100%; max-width: 520px; min-height: 36px; border-radius: 8px; border-color: var(--m-border-strong); box-shadow: none; }
+body.mgm-admin .mgm-field-control input:focus, body.mgm-admin .mgm-field-control select:focus, body.mgm-admin .mgm-field-control textarea:focus { border-color: var(--m-accent); box-shadow: 0 0 0 3px var(--m-accent-ring); }
+.mgm-field-control .description, .mgm-field-toggle .description { color: var(--m-ink-3); margin-top: 6px; }
+.mgm-field-control code { word-break: break-all; }
+.mgm-field-toggle { display: block; }
+.mgm-field-toggle .description { margin-left: 50px; }
+.mgm-subheading { font-size: 14px; margin: 16px 0 0; padding-top: 16px; border-top: 1px solid var(--m-border); }
+.mgm-savebar { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: flex-end; align-items: center; gap: 16px; padding: 12px 16px; margin: 8px 0 20px; background: rgba(255, 255, 255, .92); backdrop-filter: blur(6px); border: 1px solid var(--m-border); border-radius: var(--m-radius); box-shadow: 0 -2px 12px rgba(16, 24, 40, .06); }
+.mgm-savebar .mgm-muted { margin-right: auto; }
+.mgm-savebar p.submit { margin: 0; padding: 0; }
+
+/* Switch (used by settings & add-ons) */
+.mgm-switch { position: relative; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; }
+.mgm-switch input { position: absolute; opacity: 0; width: 38px; height: 22px; margin: 0; cursor: pointer; z-index: 1; }
+.mgm-switch-ui { flex: 0 0 38px; width: 38px; height: 22px; border-radius: 22px; background: #d0d5dd; position: relative; transition: background .15s; }
+.mgm-switch-ui::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(16, 24, 40, .2); transition: left .15s; }
+.mgm-switch input:checked + .mgm-switch-ui { background: var(--m-accent); }
+.mgm-switch input:checked + .mgm-switch-ui::after { left: 19px; }
+.mgm-switch input:focus-visible + .mgm-switch-ui { outline: 2px solid var(--m-accent); outline-offset: 2px; }
+.mgm-switch input:disabled + .mgm-switch-ui { opacity: .5; }
+.mgm-switch-label { font-weight: 600; color: var(--m-ink); }
+
+/* ---------- Add-ons ---------- */
+.mgm-addons { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 0 0 8px; }
+.mgm-addon { display: flex; gap: 14px; align-items: flex-start; background: var(--m-surface); border: 1px solid var(--m-border); border-radius: var(--m-radius); padding: 18px; cursor: pointer; box-shadow: var(--m-shadow); transition: border-color .15s, box-shadow .15s; }
+.mgm-addon:hover { border-color: var(--m-border-strong); }
+.mgm-addon.is-on { border-color: var(--m-accent); box-shadow: 0 0 0 1px var(--m-accent); }
+.mgm-addon.is-unavailable { opacity: .6; cursor: not-allowed; }
+.mgm-addon-icon { flex: 0 0 42px; height: 42px; border-radius: 10px; background: var(--m-canvas); color: var(--m-ink-3); display: inline-flex; align-items: center; justify-content: center; }
+.mgm-addon.is-on .mgm-addon-icon { background: var(--m-accent-soft); color: var(--m-accent); }
+.mgm-addon-icon .dashicons { font-size: 22px; width: 22px; height: 22px; }
+.mgm-addon-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.mgm-addon-body strong { font-size: 14px; color: var(--m-ink); }
+.mgm-addon-desc { color: var(--m-ink-3); font-size: 13px; line-height: 1.5; }
+.mgm-addon-note { display: inline-block; align-self: flex-start; margin-top: 4px; padding: 1px 8px; border-radius: 6px; background: var(--m-canvas); color: var(--m-ink-2); font-size: 12px; font-weight: 600; }
+.mgm-addon .mgm-switch { margin-top: 2px; }
+
+/* ---------- Intro strip on post-type list screens ---------- */
+.mgm-intro { display: flex; align-items: center; gap: 12px; margin: 12px 20px 4px 2px; padding: 12px 16px; background: var(--m-surface); border: 1px solid var(--m-border); border-radius: var(--m-radius); box-shadow: var(--m-shadow); }
+.mgm-intro p { margin: 0; color: var(--m-ink-2); font-size: 13px; }
+.mgm-intro-icon { flex: 0 0 34px; height: 34px; border-radius: 9px; background: var(--m-accent-soft); color: var(--m-accent); display: inline-flex; align-items: center; justify-content: center; }
+
+/* ---------- Core WP list screens of our post types ---------- */
+body.mgm-admin.edit-php .wrap { max-width: 1320px; }
+body.mgm-admin.edit-php .wrap > h1.wp-heading-inline, body.mgm-admin.post-php .wrap > h1.wp-heading-inline, body.mgm-admin.post-new-php .wrap > h1.wp-heading-inline { font-size: 26px; font-weight: 700; letter-spacing: -.01em; color: var(--m-ink); margin: 18px 10px 14px 0; }
+body.mgm-admin .wrap .page-title-action { top: -4px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 8px; background: var(--m-accent); border: 1px solid var(--m-accent); color: #fff; font-weight: 600; font-size: 13px; text-shadow: none; }
+body.mgm-admin .wrap .page-title-action:hover, body.mgm-admin .wrap .page-title-action:focus { background: var(--m-accent-hover); border-color: var(--m-accent-hover); color: #fff; }
+body.mgm-admin.edit-php .subsubsub { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #e8eaee; border-radius: 10px; padding: 3px; margin: 12px 0 8px; font-size: 0; }
+body.mgm-admin.edit-php .subsubsub li { font-size: 13px; margin: 0; }
+body.mgm-admin.edit-php .subsubsub a { display: inline-block; padding: 5px 12px; border-radius: 8px; color: var(--m-ink-2); font-weight: 600; }
+body.mgm-admin.edit-php .subsubsub a.current { background: var(--m-surface); color: var(--m-ink); box-shadow: 0 1px 3px rgba(16, 24, 40, .12); }
+body.mgm-admin.edit-php .subsubsub .count { color: var(--m-ink-3); font-weight: 500; }
+body.mgm-admin.edit-php .subsubsub li { color: transparent; }
+body.mgm-admin.edit-php .search-box { margin: 12px 0 8px; }
+body.mgm-admin.edit-php .search-box input[type=search], body.mgm-admin.edit-php .tablenav select { min-height: 34px; border-radius: 8px; border-color: var(--m-border-strong); }
+body.mgm-admin.edit-php .tablenav .button, body.mgm-admin.edit-php .search-box .button { min-height: 34px; border-radius: 8px; }
+body.mgm-admin.edit-php .wp-list-table { border: 1px solid var(--m-border); border-radius: var(--m-radius); box-shadow: var(--m-shadow); overflow: hidden; border-collapse: separate; border-spacing: 0; }
+body.mgm-admin.edit-php .wp-list-table thead th, body.mgm-admin.edit-php .wp-list-table thead td, body.mgm-admin.edit-php .wp-list-table tfoot th, body.mgm-admin.edit-php .wp-list-table tfoot td { background: var(--m-canvas); color: var(--m-ink-3); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; border-color: var(--m-border); padding-top: 10px; padding-bottom: 10px; }
+body.mgm-admin.edit-php .wp-list-table thead th a, body.mgm-admin.edit-php .wp-list-table tfoot th a { color: var(--m-ink-3); }
+body.mgm-admin.edit-php .wp-list-table tbody tr { background: var(--m-surface); }
+body.mgm-admin.edit-php .wp-list-table.striped > tbody > :nth-child(odd) { background: var(--m-surface); }
+body.mgm-admin.edit-php .wp-list-table tbody td, body.mgm-admin.edit-php .wp-list-table tbody th { padding-top: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--m-grid); box-shadow: none; }
+body.mgm-admin.edit-php .wp-list-table tbody tr:hover td, body.mgm-admin.edit-php .wp-list-table tbody tr:hover th { background: #fafbfc; }
+body.mgm-admin.edit-php .wp-list-table .row-title { color: var(--m-ink); font-weight: 600; font-size: 14px; }
+body.mgm-admin.edit-php .wp-list-table .row-title:hover { color: var(--m-accent); }
+body.mgm-admin.edit-php .wp-list-table code { background: var(--m-canvas); border-radius: 5px; padding: 2px 6px; font-size: 12px; }
+body.mgm-admin.edit-php .wp-list-table .no-items td { padding: 40px 16px; text-align: center; color: var(--m-ink-2); font-size: 14px; }
+
+/* ---------- Edit screens (metaboxes) ---------- */
+body.mgm-admin #poststuff .postbox { border: 1px solid var(--m-border); border-radius: var(--m-radius); box-shadow: var(--m-shadow); overflow: hidden; }
+body.mgm-admin #poststuff .postbox-header { border-bottom: 1px solid var(--m-border); background: var(--m-surface); }
+body.mgm-admin #poststuff .postbox-header h2 { font-size: 14px; font-weight: 600; color: var(--m-ink); padding: 12px 16px; }
+body.mgm-admin #poststuff .postbox .inside { padding: 4px 16px 16px; }
+body.mgm-admin #titlediv #title { border-radius: 10px; border-color: var(--m-border-strong); padding: 6px 12px; font-size: 20px; box-shadow: var(--m-shadow); }
+body.mgm-admin #titlediv #title:focus { border-color: var(--m-accent); box-shadow: 0 0 0 3px var(--m-accent-ring); }
+body.mgm-admin #publishing-action .button-primary { background: var(--m-accent); border-color: var(--m-accent); border-radius: 8px; min-height: 34px; font-weight: 600; }
+body.mgm-admin #publishing-action .button-primary:hover { background: var(--m-accent-hover); border-color: var(--m-accent-hover); }
+
+/* Field layout inside our metaboxes */
+.mgm-fields .mgm-field { margin: 0 0 16px; }
+.mgm-fields .mgm-field > label:first-child { display: block; font-weight: 600; margin-bottom: 6px; color: var(--m-ink, #101828); }
+.mgm-fields input[type=text], .mgm-fields input[type=number], .mgm-fields input[type=url], .mgm-fields input[type=date], .mgm-fields input[type=datetime-local], .mgm-fields select, .mgm-fields textarea { border-radius: 8px; border-color: #d0d5dd; min-height: 34px; }
+.mgm-fields input:focus, .mgm-fields select:focus, .mgm-fields textarea:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, .25); }
+.mgm-fields h4 { margin: 20px 0 12px; padding-top: 16px; border-top: 1px solid #eef0f2; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #667085; }
+.mgm-subgroup { background: #f6f7f9; border: 1px solid #eef0f2; border-radius: 10px; padding: 12px 16px; margin: 0 0 16px; }
+.mgm-checklist { max-height: 200px; overflow: auto; border: 1px solid #d0d5dd; border-radius: 8px; padding: 6px 10px; background: #fff; }
+.mgm-checklist label { display: flex; gap: 8px; align-items: center; padding: 5px 2px; border-bottom: 1px solid #f2f4f7; }
+.mgm-checklist label:last-child { border-bottom: 0; }
+
+/* ---------- Curriculum builder ---------- */
+.mgm-sections .mgm-cb-section { border: 1px solid #e3e5e8; border-radius: 10px; margin-bottom: 12px; background: #fff; overflow: hidden; }
+.mgm-cb-head { display: flex; gap: 8px; align-items: center; padding: 8px 10px; background: #f6f7f9; border-bottom: 1px solid #e3e5e8; }
+.mgm-cb-head input { flex: 1; font-weight: 600; border-radius: 7px; }
+.mgm-cb-head .dashicons-move { cursor: move; color: #8c8f94; }
+.mgm-cb-lessons { list-style: none; margin: 0; padding: 6px 10px; min-height: 30px; }
+.mgm-cb-lessons li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #eef0f2; border-radius: 8px; margin: 5px 0; background: #fff; cursor: move; }
+.mgm-cb-lessons li:hover { border-color: #d0d5dd; }
+.mgm-cb-lessons li .mgm-cb-title { flex: 1; font-weight: 500; }
+.mgm-cb-lessons li .mgm-cb-type { font-size: 11px; background: rgba(79, 70, 229, .08); color: #4f46e5; border-radius: 5px; padding: 1px 7px; font-weight: 600; text-transform: capitalize; }
+.mgm-cb-lessons .ui-sortable-placeholder { border: 1px dashed #4f46e5; visibility: visible !important; background: #eef2ff; height: 36px; border-radius: 8px; }
+.mgm-cb-add { display: flex; gap: 6px; padding: 10px; border-top: 1px dashed #e3e5e8; flex-wrap: wrap; background: #fcfcfd; }
+.mgm-cb-add select, .mgm-cb-add input { max-width: 260px; border-radius: 7px; }
+
+/* ---------- Reports chart & progress ---------- */
+.mgm-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin: 0 0 16px; }
+.mgm-card .mgm-card-value { font-size: 24px; font-weight: 700; color: var(--m-ink, #101828); font-variant-numeric: tabular-nums; }
+.mgm-card .mgm-card-label { color: var(--m-ink-3, #667085); font-size: 13px; margin-top: 2px; }
+.mgm-chart { display: flex; align-items: flex-end; gap: 3px; height: 220px; padding: 10px 0 34px; overflow-x: auto; }
+.mgm-bar { flex: 1 0 14px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
+.mgm-bar span { display: block; width: 100%; background: #4f46e5; border-radius: 4px 4px 0 0; min-height: 0; }
+.mgm-bar:hover span { background: #4338ca; }
+.mgm-bar em { position: absolute; bottom: -28px; font-style: normal; font-size: 10px; color: #667085; white-space: nowrap; transform: rotate(-45deg); transform-origin: top left; left: 40%; }
+.mgm-progress { height: 8px; background: #eef0f2; border-radius: 99px; overflow: hidden; width: 120px; display: inline-block; vertical-align: middle; }
+.mgm-progress-bar { height: 100%; background: #067647; border-radius: 99px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+	.mgm-settings { grid-template-columns: 1fr; }
+	.mgm-settings-nav { position: static; flex-direction: row; overflow-x: auto; }
+	.mgm-settings-nav a { flex: 0 0 auto; }
+	.mgm-settings-nav small { display: none; }
+}
+@media (max-width: 782px) {
+	.mgm-page-head { align-items: flex-start; }
+	.mgm-page-actions, .mgm-page-actions .mgm-btn { width: 100%; }
+	.mgm-field-row { grid-template-columns: 1fr; gap: 6px; }
+	.mgm-field-label { padding-top: 0; }
+	.mgm-toolbar, .mgm-filter { align-items: stretch; }
+	.mgm-filter, .mgm-search, body.mgm-admin .mgm-search input[type=search] { width: 100%; }
+	.mgm-grid-2 { grid-template-columns: 1fr; }
+	.mgm-intro { margin-right: 10px; }
+	.mgm-savebar .mgm-muted { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { body.mgm-admin * { transition: none !important; } }
+
+/* ---------- Refinements ---------- */
+body.mgm-admin table.mgm-table td.num { color: var(--m-ink); }
+.mgm-intro { margin-right: 0; }
+.mgm-access-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 32px; }
+body.mgm-admin .mgm-access-list li, body.mgm-admin .mgm-access-list li:first-child { border-top: 0; border-bottom: 1px solid var(--m-grid); padding: 10px 0; }
+.mgm-addon.is-on { border-color: #c7c4f5; box-shadow: var(--m-shadow); }
+.mgm-addon.is-on:hover { border-color: var(--m-accent); }
+body.mgm-admin .mgm-new-txn input[type=text], body.mgm-admin .mgm-new-txn input[type=number], body.mgm-admin .mgm-new-txn input[type=date], body.mgm-admin .mgm-new-txn select { min-height: 36px; border-radius: 8px; border-color: var(--m-border-strong); box-shadow: none; }
+body.mgm-admin .mgm-new-txn input:focus, body.mgm-admin .mgm-new-txn select:focus { border-color: var(--m-accent); box-shadow: 0 0 0 3px var(--m-accent-ring); }
+body.mgm-admin .mgm-new-txn .form-table th, body.mgm-admin .mgm-new-txn .form-table td { padding-top: 10px; padding-bottom: 10px; }
+body.mgm-admin .mgm-new-txn label { margin-left: 8px; }
+body.mgm-admin .mgm-new-txn .description { color: var(--m-ink-3); }
+.mgm-bar span { max-width: 28px; }
+.mgm-bar em { transform: none; left: auto; font-size: 11px; }
+
+.mgm-bulkbar { display: flex; gap: 8px; align-items: center; margin: 0 0 10px; flex-wrap: wrap; }
+body.mgm-admin .mgm-bulkbar select { height: 32px; border-radius: 8px; border-color: var(--m-border-strong); }
+body.mgm-admin table.mgm-table .check-column { width: 36px; padding-left: 14px; }
+.mgm-repeater td, .mgm-repeater th { vertical-align: top; }
+body.mgm-admin .mgm-repeater input[type=text], body.mgm-admin .mgm-repeater select { width: 100%; min-height: 32px; border-radius: 7px; }

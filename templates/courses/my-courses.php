@@ -31,6 +31,6 @@ if ( ! empty( $limit ) ) {
 		</div>
 	<?php endforeach; ?>
 	<?php if ( ! $courses ) : ?>
-		<p><?php esc_html_e( 'You are not enrolled in any course yet.', 'mg-membership' ); ?> <a href="<?php echo esc_url( mgm_page_url( 'courses' ) ); ?>"><?php esc_html_e( 'Browse courses', 'mg-membership' ); ?></a></p>
+		<?php echo MGM_Account::empty_state( __( 'No courses yet', 'mg-membership' ), __( 'You are not enrolled in any course yet.', 'mg-membership' ), __( 'Browse courses', 'mg-membership' ), mgm_page_url( 'courses' ), 'courses' ); // phpcs:ignore ?>
 	<?php endif; ?>
 </div>

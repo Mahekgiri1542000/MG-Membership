@@ -169,7 +169,7 @@ class MGM_Install {
 
 		$addons = get_option( 'mgm_active_addons', null );
 		if ( null === $addons ) {
-			update_option( 'mgm_active_addons', array( 'coupons', 'courses', 'events', 'certificates', 'reports', 'page-builders', 'drip', 'custom-fields', 'menu-visibility', 'downloads', 'pay-per-post', 'activity-log', 'security' ) );
+			update_option( 'mgm_active_addons', array( 'coupons', 'courses', 'events', 'certificates', 'reports', 'page-builders', 'drip', 'menu-visibility', 'downloads', 'pay-per-post', 'activity-log', 'security' ) );
 		}
 	}
 

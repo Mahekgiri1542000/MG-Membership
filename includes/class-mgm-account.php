@@ -41,20 +41,58 @@ class MGM_Account {
 		$current = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'home'; // phpcs:ignore
 		$current = isset( $tabs[ $current ] ) ? $current : 'home';
 		$user    = wp_get_current_user();
+		$classes = array(
+			'mgm-account',
+			'mgm-account--' . ( 'tabs' === MGM_Appearance::get( 'acc_layout' ) ? 'tabs' : 'sidebar' ),
+			'mgm-tab-' . $current,
+		);
+		if ( MGM_Appearance::on( 'acc_wide' ) && (int) MGM_Appearance::get( 'ui_width' ) > 0 ) {
+			$classes[] = 'is-wide';
+		}
+		if ( ! MGM_Appearance::on( 'acc_show_icons' ) ) {
+			$classes[] = 'no-icons';
+		}
 
 		ob_start();
-		echo mgm_print_notices(); // phpcs:ignore
-		echo '<div class="mgm-account"><nav class="mgm-account-nav">';
+		echo '<div class="' . esc_attr( implode( ' ', apply_filters( 'mgm_account_classes', $classes, $current ) ) ) . '">';
+		echo '<aside class="mgm-account-side">';
+		if ( MGM_Appearance::on( 'acc_show_header' ) ) {
+			self::user_card( $user );
+		}
+		echo '<nav class="mgm-account-nav" aria-label="' . esc_attr__( 'Account menu', 'mg-membership' ) . '">';
 		foreach ( $tabs as $key => $label ) {
 			printf(
-				'<a href="%s" class="%s">%s</a>',
+				'<a href="%1$s" class="mgm-nav-%2$s%3$s"%4$s>%5$s<span>%6$s</span></a>',
 				esc_url( self::tab_url( $key ) ),
-				$key === $current ? 'is-active' : '',
+				esc_attr( $key ),
+				$key === $current ? ' is-active' : '',
+				$key === $current ? ' aria-current="page"' : '',
+				self::icon( $key ), // phpcs:ignore -- static SVG markup.
 				esc_html( $label )
 			);
 		}
-		printf( '<a href="%s" class="mgm-logout">%s</a>', esc_url( wp_logout_url( home_url( '/' ) ) ), esc_html__( 'Log out', 'mg-membership' ) );
-		echo '</nav><div class="mgm-account-content">';
+		printf(
+			'<a href="%1$s" class="mgm-logout">%2$s<span>%3$s</span></a>',
+			esc_url( wp_logout_url( home_url( '/' ) ) ),
+			self::icon( 'logout' ), // phpcs:ignore
+			esc_html( MGM_Appearance::get( 'acc_logout_label' ) )
+		);
+		echo '</nav></aside><div class="mgm-account-content">';
+		echo mgm_print_notices(); // phpcs:ignore
+
+		// Section header: greeting on the dashboard, the menu label everywhere else.
+		if ( 'home' === $current ) {
+			$title = MGM_Appearance::text( 'acc_greeting', $user );
+			$desc  = MGM_Appearance::text( 'acc_intro', $user );
+		} else {
+			$title = $tabs[ $current ];
+			$desc  = self::tab_description( $current );
+		}
+		echo '<header class="mgm-account-head"><h2 class="mgm-account-title">' . esc_html( $title ) . '</h2>';
+		if ( '' !== trim( (string) $desc ) ) {
+			echo '<p class="mgm-account-desc">' . esc_html( $desc ) . '</p>';
+		}
+		echo '</header>';
 
 		$template = 'account/' . $current . '.php';
 		if ( file_exists( mgm_locate_template( $template ) ) ) {
@@ -63,6 +101,73 @@ class MGM_Account {
 		do_action( 'mgm_account_tab_' . $current, $user );
 		echo '</div></div>';
 		return ob_get_clean();
+	}
+
+	/** Avatar, name, email and membership badge shown above the menu. */
+	public static function user_card( WP_User $user ) {
+		$active = MGM_Member::active_membership_ids( $user->ID );
+		echo '<div class="mgm-account-user">';
+		echo get_avatar( $user->ID, 96, '', '', array( 'class' => 'mgm-account-avatar' ) ); // phpcs:ignore
+		echo '<div class="mgm-account-user-info"><strong>' . esc_html( $user->display_name ) . '</strong><span>' . esc_html( $user->user_email ) . '</span>';
+		if ( $active ) {
+			echo '<em class="mgm-account-plan">' . esc_html( get_the_title( $active[0] ) ) . ( count( $active ) > 1 ? ' +' . ( count( $active ) - 1 ) : '' ) . '</em>';
+		}
+		echo '</div></div>';
+	}
+
+	/** Short line under each section title. Filter: mgm_account_tab_descriptions. */
+	public static function tab_description( $tab ) {
+		$d = apply_filters(
+			'mgm_account_tab_descriptions',
+			array(
+				'courses'       => __( 'Pick up where you left off.', 'mg-membership' ),
+				'events'        => __( 'Seminars and events you have registered for.', 'mg-membership' ),
+				'subscriptions' => __( 'Manage your plans, renewals and payment details.', 'mg-membership' ),
+				'payments'      => __( 'Your payment history and receipts.', 'mg-membership' ),
+				'downloads'     => __( 'Files included with your membership.', 'mg-membership' ),
+				'profile'       => __( 'Update your personal details and password.', 'mg-membership' ),
+				'privacy'       => __( 'Download or delete the personal data we hold about you.', 'mg-membership' ),
+				'team'          => __( 'Invite people to share your membership.', 'mg-membership' ),
+			)
+		);
+		return $d[ $tab ] ?? '';
+	}
+
+	/** Menu icons (inline SVG, inherit the text colour). Filter: mgm_account_icons. */
+	public static function icon( $key ) {
+		$paths = apply_filters(
+			'mgm_account_icons',
+			array(
+				'home'          => '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+				'courses'       => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+				'events'        => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+				'subscriptions' => '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+				'payments'      => '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+				'downloads'     => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
+				'profile'       => '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+				'privacy'       => '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+				'team'          => '<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M22 21a7 7 0 0 0-4.5-6.5"/>',
+				'logout'        => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+				'membership'    => '<path d="M12 2l3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9z"/>',
+				'calendar'      => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+				'clock'         => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+				'default'       => '<circle cx="12" cy="12" r="3.5"/>',
+			)
+		);
+		$path = $paths[ $key ] ?? $paths['default'];
+		return '<svg class="mgm-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' . $path . '</svg>';
+	}
+
+	/** Friendly empty state used by account sections. */
+	public static function empty_state( $title, $text = '', $button = '', $url = '', $icon = 'default' ) {
+		$out = '<div class="mgm-empty"><span class="mgm-empty-icon">' . self::icon( $icon ) . '</span><h3>' . esc_html( $title ) . '</h3>';
+		if ( $text ) {
+			$out .= '<p>' . esc_html( $text ) . '</p>';
+		}
+		if ( $button && $url ) {
+			$out .= '<a class="mgm-button" href="' . esc_url( $url ) . '">' . esc_html( $button ) . '</a>';
+		}
+		return $out . '</div>';
 	}
 
 	public static function render_login( $redirect = '' ) {
@@ -141,12 +246,24 @@ class MGM_Account {
 
 		// Profile update.
 		if ( ! empty( $_POST['mgm_profile'] ) && isset( $_POST['_mgm_nonce'] ) && wp_verify_nonce( sanitize_key( $_POST['_mgm_nonce'] ), 'mgm_profile' ) ) {
-			$data  = array(
-				'ID'           => $user_id,
-				'first_name'   => sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) ),
-				'last_name'    => sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) ),
-				'display_name' => sanitize_text_field( wp_unslash( $_POST['display_name'] ?? '' ) ),
-			);
+			// Required fields set in MG Membership → Forms.
+			$invalid = MGM_Forms::validate( 'profile' );
+			if ( $invalid->has_errors() ) {
+				foreach ( $invalid->get_error_messages() as $m ) {
+					mgm_add_notice( $m );
+				}
+				return;
+			}
+			// Only fields that are on the form are updated (a hidden field must not wipe saved data).
+			$data = array( 'ID' => $user_id );
+			foreach ( array( 'first_name', 'last_name', 'display_name' ) as $k ) {
+				if ( isset( $_POST[ $k ] ) ) {
+					$data[ $k ] = sanitize_text_field( wp_unslash( $_POST[ $k ] ) );
+				}
+			}
+			if ( isset( $data['display_name'] ) && '' === $data['display_name'] ) {
+				unset( $data['display_name'] );
+			}
 			$email   = sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) );
 			$current = wp_get_current_user();
 			$pass    = (string) wp_unslash( $_POST['new_pass'] ?? '' ); // phpcs:ignore

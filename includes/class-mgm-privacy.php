@@ -168,13 +168,13 @@ class MGM_Privacy {
 	}
 
 	public static function tab_content( $user ) {
-		echo '<h2>' . esc_html__( 'Privacy', 'mg-membership' ) . '</h2>';
-		echo '<p>' . esc_html__( 'You can get a copy of the personal data we hold about you, or ask us to delete your account data. For your security we will email you a confirmation link first.', 'mg-membership' ) . '</p>';
+		echo '<div class="mgm-box"><p>' . esc_html__( 'You can get a copy of the personal data we hold about you, or ask us to delete your account data. For your security we will email you a confirmation link first.', 'mg-membership' ) . '</p>';
 		foreach ( array( 'export_personal_data' => __( 'Email me a copy of my data', 'mg-membership' ), 'remove_personal_data' => __( 'Request deletion of my data', 'mg-membership' ) ) as $action => $label ) {
 			echo '<form method="post" class="mgm-inline-form" style="display:inline-block;margin:0 .5em .5em 0">';
 			wp_nonce_field( 'mgm_privacy', '_mgm_nonce' );
 			echo '<input type="hidden" name="mgm_privacy_request" value="' . esc_attr( $action ) . '"><button class="mgm-button' . ( 'remove_personal_data' === $action ? ' mgm-button-secondary' : '' ) . '" ' . ( 'remove_personal_data' === $action ? 'onclick="return confirm(\'' . esc_js( __( 'Request deletion of your data? An administrator will process it after you confirm by email.', 'mg-membership' ) ) . '\')"' : '' ) . '>' . esc_html( $label ) . '</button></form>';
 		}
+		echo '</div>';
 	}
 
 	/* ------------------------- Handlers -------------------------- */

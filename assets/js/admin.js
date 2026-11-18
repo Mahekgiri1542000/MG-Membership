@@ -172,4 +172,105 @@
 			new Builder( $cb );
 		}
 	} );
+	/* Settings → Appearance: colour pickers + live preview. */
+	$( function () {
+		var $preview = $( '#mgm-ui-preview' );
+		var el = $preview[ 0 ];
+		var fonts = $preview.data( 'fonts' ) || {};
+		var colorVars = {
+			ui_accent: '--mgm-accent', ui_accent_text: '--mgm-accent-contrast', ui_text: '--mgm-text', ui_muted: '--mgm-muted',
+			ui_border: '--mgm-border', ui_surface: '--mgm-surface', ui_soft: '--mgm-soft', ui_success: '--mgm-success', ui_danger: '--mgm-danger'
+		};
+		var shadows = {
+			none: 'none',
+			soft: '0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06)',
+			strong: '0 4px 6px -2px rgba(16,24,40,.06), 0 12px 24px -6px rgba(16,24,40,.14)'
+		};
+		function setVar( name, value ) {
+			if ( el && value !== undefined && value !== null && value !== '' ) {
+				el.style.setProperty( name, value );
+			}
+		}
+		function clamp( v, min, max, fallback ) {
+			v = parseInt( v, 10 );
+			return isNaN( v ) ? fallback : Math.max( min, Math.min( max, v ) );
+		}
+		function shape() {
+			var r = clamp( $( '#ui_radius' ).val(), 0, 32, 12 );
+			var s = $( '#ui_button_shape' ).val();
+			setVar( '--mgm-radius', r + 'px' );
+			setVar( '--mgm-btn-radius', 'pill' === s ? '999px' : ( 'square' === s ? '0px' : Math.round( r * 0.7 ) + 'px' ) );
+		}
+		function font() {
+			var key = $( '#ui_font' ).val();
+			var stack = 'custom' === key ? ( $( '#ui_font_custom' ).val() || 'inherit' ) : ( fonts[ key ] || 'inherit' );
+			setVar( '--mgm-font', stack );
+		}
+
+		if ( $.fn.wpColorPicker ) {
+			$( '.mgm-color' ).each( function () {
+				var id = this.id;
+				$( this ).wpColorPicker( {
+					change: function ( e, ui ) {
+						setVar( colorVars[ id ], ui.color.toString() );
+					},
+					clear: function () {
+						setVar( colorVars[ id ], $( '#' + id ).data( 'default-color' ) );
+					}
+				} );
+			} );
+		}
+		if ( ! el ) {
+			return;
+		}
+		$( '#ui_radius, #ui_button_shape' ).on( 'input change', shape );
+		$( '#ui_font, #ui_font_custom' ).on( 'input change', font );
+		$( '#ui_font_size' ).on( 'input change', function () {
+			setVar( '--mgm-font-size', clamp( this.value, 12, 22, 16 ) + 'px' );
+		} );
+		$( '#ui_heading_weight' ).on( 'change', function () {
+			setVar( '--mgm-heading-weight', this.value );
+		} );
+		$( '#ui_shadow' ).on( 'change', function () {
+			setVar( '--mgm-shadow', shadows[ this.value ] || shadows.soft );
+		} );
+	} );
+	/* Forms & Fields builder: reorder, open/close, add/remove, live label. */
+	$( function () {
+		var $list = $( '.mgm-fb-list' );
+		if ( ! $list.length ) {
+			return;
+		}
+		if ( $.fn.sortable ) {
+			$list.sortable( { handle: '.mgm-fb-handle', axis: 'y', placeholder: 'mgm-fb-placeholder', forcePlaceholderSize: true } );
+		}
+		$list.on( 'click', '.mgm-fb-toggle', function () {
+			var $item = $( this ).closest( '.mgm-fb-item' ).toggleClass( 'is-open' );
+			$( this ).attr( 'aria-expanded', $item.hasClass( 'is-open' ) ? 'true' : 'false' );
+		} );
+		$list.on( 'input', '.mgm-fb-label-input', function () {
+			$( this ).closest( '.mgm-fb-item' ).find( '.mgm-fb-label' ).text( this.value || '…' );
+		} );
+		$list.on( 'change', '.mgm-fb-visible input[type=checkbox]', function () {
+			$( this ).closest( '.mgm-fb-item' ).toggleClass( 'is-off', ! this.checked );
+		} );
+		$list.on( 'change', '.mgm-fb-type', function () {
+			var choice = /^(select|radio)$/.test( this.value );
+			$( this ).closest( '.mgm-fb-item' ).find( '.mgm-fb-choices' ).closest( 'p' ).toggle( choice );
+		} ).find( '.mgm-fb-type' ).trigger( 'change' );
+		$list.on( 'click', '.mgm-fb-remove', function () {
+			$( this ).closest( '.mgm-fb-item' ).remove();
+		} );
+		$( '.mgm-fb-add' ).on( 'click', function () {
+			var tpl = document.getElementById( 'mgm-fb-template' );
+			if ( ! tpl ) {
+				return;
+			}
+			var html = tpl.innerHTML.replace( /__N__/g, 'n' + Date.now() );
+			var $item = $( html ).appendTo( $list );
+			$item.find( '.mgm-fb-type' ).trigger( 'change' );
+			$item.find( '.mgm-fb-label-input' ).trigger( 'focus' );
+			$item[ 0 ].scrollIntoView( { behavior: 'smooth', block: 'center' } );
+		} );
+	} );
 } )( jQuery );

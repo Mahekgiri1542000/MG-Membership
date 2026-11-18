@@ -10,11 +10,10 @@ defined( 'ABSPATH' ) || exit;
 $subs   = MGM_Subscription::for_user( $user->ID );
 $active = MGM_Member::active_membership_ids( $user->ID );
 ?>
-<h2><?php esc_html_e( 'Subscriptions', 'mg-membership' ); ?></h2>
 <?php if ( ! $subs ) : ?>
-	<p><?php esc_html_e( 'You have no subscriptions.', 'mg-membership' ); ?></p>
+	<?php echo MGM_Account::empty_state( __( 'No subscriptions yet', 'mg-membership' ), __( 'When you join a plan it will appear here, with its renewal date and options.', 'mg-membership' ), __( 'Browse plans', 'mg-membership' ), mgm_page_url( 'pricing' ), 'subscriptions' ); // phpcs:ignore ?>
 <?php else : ?>
-	<table class="mgm-table">
+	<div class="mgm-box mgm-box-flush"><table class="mgm-table">
 		<thead><tr><th><?php esc_html_e( 'Membership', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Terms', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Status', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Next payment', 'mg-membership' ); ?></th><th></th></tr></thead>
 		<tbody>
 		<?php foreach ( $subs as $sub ) : ?>
@@ -44,5 +43,5 @@ $active = MGM_Member::active_membership_ids( $user->ID );
 			</tr>
 		<?php endforeach; ?>
 		</tbody>
-	</table>
+	</table></div>
 <?php endif; ?>

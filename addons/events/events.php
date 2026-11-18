@@ -555,7 +555,6 @@ class MGM_Events {
 	}
 
 	public static function account_tab_content( $user ) {
-		echo '<h2>' . esc_html__( 'My Events', 'mg-membership' ) . '</h2>';
 		echo mgm_get_template( 'events/my-events.php', array( 'user_id' => $user->ID ) ); // phpcs:ignore
 	}
 }

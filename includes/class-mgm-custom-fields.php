@@ -1,6 +1,6 @@
 <?php
 /**
- * Add-on: Custom registration & profile fields.
+ * Custom registration & profile fields (core). Field definitions are edited in MG Membership → Forms.
  *
  * @package MG_Membership
  */
@@ -19,21 +19,27 @@ class MGM_Custom_Fields {
 	const TYPES = array( 'text', 'textarea', 'select', 'radio', 'checkbox', 'date', 'tel', 'url', 'number' );
 
 	public static function init() {
-		add_action( 'mgm_checkout_fields', array( __CLASS__, 'checkout_fields' ) );
 		add_filter( 'mgm_checkout_validate', array( __CLASS__, 'validate_checkout' ), 10, 3 );
 		add_action( 'mgm_checkout_user_ready', array( __CLASS__, 'save_checkout' ), 10, 2 );
-		add_action( 'mgm_profile_fields', array( __CLASS__, 'profile_fields' ) );
 		add_action( 'mgm_profile_updated', array( __CLASS__, 'save_profile' ), 10, 2 );
 		add_filter( 'mgm_export_member_columns', array( __CLASS__, 'export_columns' ) );
 		add_filter( 'mgm_export_member_value', array( __CLASS__, 'export_value' ), 10, 3 );
 		if ( is_admin() ) {
-			add_action( 'mgm_admin_menu', array( __CLASS__, 'menu' ) );
-			add_action( 'admin_post_mgm_save_fields', array( __CLASS__, 'save_fields' ) );
 			add_action( 'mgm_admin_member_detail', array( __CLASS__, 'member_detail' ) );
 			add_action( 'show_user_profile', array( __CLASS__, 'wp_profile' ), 20 );
 			add_action( 'edit_user_profile', array( __CLASS__, 'wp_profile' ), 20 );
 			add_action( 'personal_options_update', array( __CLASS__, 'wp_profile_save' ) );
 			add_action( 'edit_user_profile_update', array( __CLASS__, 'wp_profile_save' ) );
+			// Users → Add New.
+			add_action( 'user_new_form', array( __CLASS__, 'wp_new_user_form' ) );
+			add_action( 'user_register', array( __CLASS__, 'wp_profile_save' ) );
+			// Format errors are shown in WordPress' own notice and stop the save (profile, edit user, add user).
+			add_action( 'user_profile_update_errors', array( __CLASS__, 'wp_profile_errors' ), 10, 3 );
+			// Users → All Users columns.
+			add_filter( 'manage_users_columns', array( __CLASS__, 'users_columns' ) );
+			add_filter( 'manage_users_custom_column', array( __CLASS__, 'users_column_value' ), 10, 3 );
+			add_filter( 'manage_users_sortable_columns', array( __CLASS__, 'users_sortable' ) );
+			add_action( 'pre_get_users', array( __CLASS__, 'users_orderby' ) );
 		}
 	}
 
@@ -43,7 +49,7 @@ class MGM_Custom_Fields {
 		return is_array( $fields ) ? array_values( $fields ) : array();
 	}
 
-	private static function options_of( $f ) {
+	public static function options_of( $f ) {
 		return array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $f['options'] ?? '' ) ) ), 'strlen' ) );
 	}
 
@@ -104,28 +110,9 @@ class MGM_Custom_Fields {
 		return $out . '</p>';
 	}
 
-	private static function posted( $key ) {
+	public static function posted( $key ) {
 		$all = isset( $_POST['mgm_field'] ) ? (array) wp_unslash( $_POST['mgm_field'] ) : array(); // phpcs:ignore
 		return isset( $all[ $key ] ) ? $all[ $key ] : null;
-	}
-
-	public static function checkout_fields( $membership ) {
-		$user = wp_get_current_user();
-		foreach ( self::for_screen( 'checkout', $membership->id ) as $f ) {
-			$p = self::posted( $f['key'] );
-			echo self::input( $f, null !== $p ? $p : ( $user->ID ? mgm_get_member_field( $user->ID, $f['key'] ) : '' ) ); // phpcs:ignore -- escaped in input().
-		}
-	}
-
-	public static function profile_fields( $user ) {
-		$fields = self::for_screen( 'profile' );
-		if ( ! $fields ) {
-			return;
-		}
-		echo '<h3>' . esc_html__( 'More about you', 'mg-membership' ) . '</h3>';
-		foreach ( $fields as $f ) {
-			echo self::input( $f, mgm_get_member_field( $user->ID, $f['key'] ) ); // phpcs:ignore
-		}
 	}
 
 	/* --------------------------- Validation ---------------------------- */
@@ -212,7 +199,7 @@ class MGM_Custom_Fields {
 		return $errors;
 	}
 
-	private static function store( $user_id, array $clean ) {
+	public static function store( $user_id, array $clean ) {
 		foreach ( $clean as $k => $v ) {
 			update_user_meta( $user_id, 'mgm_field_' . sanitize_key( $k ), $v );
 		}
@@ -271,118 +258,206 @@ class MGM_Custom_Fields {
 		echo '</dl></section>';
 	}
 
-	public static function wp_profile( $user ) {
-		$fields = self::fields();
-		if ( ! $fields || ! current_user_can( 'edit_user', $user->ID ) ) {
-			return;
+	/* ------------------------- WordPress Users ------------------------- */
+
+	/** Field shown as a column in Users → All Users (on unless switched off in Forms & Fields). */
+	public static function in_users_list( array $f ) {
+		return ! isset( $f['admin_column'] ) || '' !== (string) $f['admin_column'];
+	}
+
+	/** A field control styled like the rest of the WordPress profile screen. */
+	public static function admin_control( array $f, $value ) {
+		$key  = sanitize_key( $f['key'] );
+		$name = 'mgm_field[' . $key . ']';
+		$id   = 'mgm-field-' . $key;
+		$ph   = ! empty( $f['placeholder'] ) ? ' placeholder="' . esc_attr( $f['placeholder'] ) . '"' : '';
+		switch ( $f['type'] ) {
+			case 'textarea':
+				$out = '<textarea id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" rows="4" class="large-text"' . $ph . '>' . esc_textarea( (string) $value ) . '</textarea>';
+				break;
+			case 'select':
+				$out = '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"><option value="">' . esc_html__( '— Select —', 'mg-membership' ) . '</option>';
+				foreach ( self::options_of( $f ) as $o ) {
+					$out .= '<option value="' . esc_attr( $o ) . '" ' . selected( (string) $value, $o, false ) . '>' . esc_html( $o ) . '</option>';
+				}
+				$out .= '</select>';
+				break;
+			case 'radio':
+				$out = '<fieldset><legend class="screen-reader-text">' . esc_html( $f['label'] ) . '</legend><input type="hidden" name="' . esc_attr( $name ) . '" value="">';
+				foreach ( self::options_of( $f ) as $o ) {
+					$out .= '<label><input type="radio" name="' . esc_attr( $name ) . '" value="' . esc_attr( $o ) . '" ' . checked( (string) $value, $o, false ) . '> ' . esc_html( $o ) . '</label><br>';
+				}
+				$out .= '</fieldset>';
+				break;
+			case 'checkbox':
+				$out = '<label for="' . esc_attr( $id ) . '"><input type="hidden" name="' . esc_attr( $name ) . '" value=""><input type="checkbox" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="1" ' . checked( '1', (string) $value, false ) . '> ' . esc_html__( 'Yes', 'mg-membership' ) . '</label>';
+				break;
+			default:
+				$type = in_array( $f['type'], array( 'date', 'tel', 'url', 'number' ), true ) ? $f['type'] : 'text';
+				$out  = '<input type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( (string) $value ) . '" class="regular-text"' . $ph . '>';
 		}
-		echo '<h2>' . esc_html__( 'Membership profile fields', 'mg-membership' ) . '</h2><table class="form-table" role="presentation">';
+		if ( ! empty( $f['help'] ) ) {
+			$out .= '<p class="description">' . esc_html( $f['help'] ) . '</p>';
+		}
+		return $out;
+	}
+
+	private static function admin_rows( $user_id ) {
+		$where = array(
+			'both'     => __( 'Registration + profile', 'mg-membership' ),
+			'checkout' => __( 'Registration only', 'mg-membership' ),
+			'profile'  => __( 'Profile only', 'mg-membership' ),
+			'none'     => __( 'Admin only', 'mg-membership' ),
+		);
 		wp_nonce_field( 'mgm_wp_profile_fields', '_mgm_fields_nonce' );
-		foreach ( $fields as $f ) {
-			echo '<tr><td colspan="2">' . self::input( array_merge( $f, array( 'required' => false ) ), mgm_get_member_field( $user->ID, $f['key'] ) ) . '</td></tr>'; // phpcs:ignore
+		echo '<table class="form-table mgm-user-fields" role="presentation">';
+		foreach ( self::fields() as $f ) {
+			$value = $user_id ? mgm_get_member_field( $user_id, $f['key'] ) : '';
+			$label = 'radio' === $f['type'] ? '<span>' . esc_html( $f['label'] ) . '</span>' : '<label for="mgm-field-' . esc_attr( sanitize_key( $f['key'] ) ) . '">' . esc_html( $f['label'] ) . '</label>';
+			echo '<tr class="mgm-user-field-' . esc_attr( sanitize_key( $f['key'] ) ) . '"><th>' . $label . ( ! empty( $f['required'] ) ? ' <span class="description">' . esc_html__( '(required for members)', 'mg-membership' ) . '</span>' : '' ) . '</th><td>' . self::admin_control( $f, $value ); // phpcs:ignore -- escaped above / inside.
+			echo '<p class="description mgm-user-field-where">' . esc_html( sprintf( __( 'Shown on: %s', 'mg-membership' ), $where[ $f['show_on'] ?? 'both' ] ?? $where['both'] ) ) . '</p></td></tr>';
 		}
 		echo '</table>';
 	}
 
-	public static function wp_profile_save( $user_id ) {
-		if ( ! current_user_can( 'edit_user', $user_id ) || ! isset( $_POST['_mgm_fields_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_mgm_fields_nonce'] ), 'mgm_wp_profile_fields' ) ) {
+	private static function section_title() {
+		echo '<h2 id="mgm-member-details">' . esc_html__( 'Member details', 'mg-membership' );
+		if ( current_user_can( mgm_admin_cap() ) ) {
+			echo ' <a class="page-title-action" href="' . esc_url( admin_url( 'admin.php?page=mgm-forms' ) ) . '">' . esc_html__( 'Manage fields', 'mg-membership' ) . '</a>';
+		}
+		echo '</h2><p class="description">' . esc_html__( 'Extra fields from MG Membership → Forms & Fields. Members fill these in when they sign up or in Account → Profile.', 'mg-membership' ) . '</p>';
+	}
+
+	/** Profile + Users → Edit. */
+	public static function wp_profile( $user ) {
+		if ( ! self::fields() || ! current_user_can( 'edit_user', $user->ID ) ) {
 			return;
 		}
-		$relaxed = array_map(
+		self::section_title();
+		self::admin_rows( $user->ID );
+	}
+
+	/** Users → Add New. */
+	public static function wp_new_user_form( $type ) {
+		if ( 'add-new-user' !== $type || ! self::fields() || ! current_user_can( 'create_users' ) ) {
+			return;
+		}
+		self::section_title();
+		self::admin_rows( 0 );
+	}
+
+	private static function admin_posted_ok() {
+		return isset( $_POST['_mgm_fields_nonce'] ) && wp_verify_nonce( sanitize_key( $_POST['_mgm_fields_nonce'] ), 'mgm_wp_profile_fields' ); // phpcs:ignore
+	}
+
+	/** Admins are not forced to fill "required" fields, but values must be valid. */
+	private static function relaxed() {
+		return array_map(
 			function ( $f ) {
 				$f['required'] = false;
 				return $f;
 			},
 			self::fields()
 		);
-		list( $clean ) = self::check( $relaxed );
+	}
+
+	public static function wp_profile_errors( $errors, $update, $user ) {
+		if ( ! self::admin_posted_ok() ) {
+			return;
+		}
+		list( , $e ) = self::check( self::relaxed() );
+		foreach ( $e->get_error_messages() as $m ) {
+			$errors->add( 'mgm_field', $m );
+		}
+	}
+
+	public static function wp_profile_save( $user_id ) {
+		if ( ! self::admin_posted_ok() || ! current_user_can( 'edit_user', $user_id ) ) {
+			return;
+		}
+		list( $clean, $e ) = self::check( self::relaxed() );
+		if ( $e->has_errors() ) {
+			return; // Shown by wp_profile_errors(); nothing is saved.
+		}
 		self::store( $user_id, $clean );
 	}
 
-	public static function menu( $cap ) {
-		add_submenu_page( 'mgm', __( 'Custom Fields', 'mg-membership' ), __( 'Custom Fields', 'mg-membership' ), $cap, 'mgm-fields', array( __CLASS__, 'page' ) );
-	}
-
-	public static function page() {
-		$fields   = self::fields();
-		$fields[] = array( 'key' => '', 'label' => '', 'type' => 'text', 'options' => '', 'required' => '', 'show_on' => 'both', 'public' => '', 'placeholder' => '', 'help' => '', 'memberships' => array() );
-		$types    = array(
-			'text'     => __( 'Text', 'mg-membership' ),
-			'textarea' => __( 'Paragraph', 'mg-membership' ),
-			'select'   => __( 'Dropdown', 'mg-membership' ),
-			'radio'    => __( 'Radio buttons', 'mg-membership' ),
-			'checkbox' => __( 'Checkbox', 'mg-membership' ),
-			'date'     => __( 'Date', 'mg-membership' ),
-			'tel'      => __( 'Phone', 'mg-membership' ),
-			'url'      => __( 'Website', 'mg-membership' ),
-			'number'   => __( 'Number', 'mg-membership' ),
-		);
-		MGM_Admin::header( __( 'Custom Fields', 'mg-membership' ), array( 'desc' => __( 'Extra questions on registration and in the member profile. Values are saved on the member and included in the Members CSV export.', 'mg-membership' ) ) );
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-		wp_nonce_field( 'mgm_save_fields' );
-		echo '<input type="hidden" name="action" value="mgm_save_fields"><div class="mgm-table-card"><table class="widefat mgm-table mgm-repeater"><thead><tr><th>' . esc_html__( 'Label', 'mg-membership' ) . '</th><th>' . esc_html__( 'Type', 'mg-membership' ) . '</th><th>' . esc_html__( 'Choices (comma separated)', 'mg-membership' ) . '</th><th>' . esc_html__( 'Show on', 'mg-membership' ) . '</th><th>' . esc_html__( 'Required', 'mg-membership' ) . '</th><th>' . esc_html__( 'Public on profile', 'mg-membership' ) . '</th><th>' . esc_html__( 'Delete', 'mg-membership' ) . '</th></tr></thead><tbody>';
-		foreach ( $fields as $i => $f ) {
-			$n = 'fields[' . $i . ']';
-			echo '<tr><td><input type="hidden" name="' . esc_attr( $n ) . '[key]" value="' . esc_attr( $f['key'] ) . '"><input type="text" name="' . esc_attr( $n ) . '[label]" value="' . esc_attr( $f['label'] ) . '" placeholder="' . esc_attr( '' === $f['key'] ? __( '+ New field label', 'mg-membership' ) : '' ) . '"><input type="text" name="' . esc_attr( $n ) . '[help]" value="' . esc_attr( $f['help'] ?? '' ) . '" placeholder="' . esc_attr__( 'Help text (optional)', 'mg-membership' ) . '" style="margin-top:4px">' . ( $f['key'] ? '<br><small class="mgm-muted">' . esc_html__( 'Key:', 'mg-membership' ) . ' <code>' . esc_html( $f['key'] ) . '</code></small>' : '' ) . '</td>';
-			echo '<td><select name="' . esc_attr( $n ) . '[type]">';
-			foreach ( $types as $tk => $tl ) {
-				echo '<option value="' . esc_attr( $tk ) . '" ' . selected( $f['type'], $tk, false ) . '>' . esc_html( $tl ) . '</option>';
-			}
-			echo '</select></td><td><input type="text" name="' . esc_attr( $n ) . '[options]" value="' . esc_attr( $f['options'] ?? '' ) . '"></td>';
-			echo '<td><select name="' . esc_attr( $n ) . '[show_on]">';
-			foreach ( array( 'both' => __( 'Registration + profile', 'mg-membership' ), 'checkout' => __( 'Registration only', 'mg-membership' ), 'profile' => __( 'Profile only', 'mg-membership' ) ) as $sk => $sl ) {
-				echo '<option value="' . esc_attr( $sk ) . '" ' . selected( $f['show_on'] ?? 'both', $sk, false ) . '>' . esc_html( $sl ) . '</option>';
-			}
-			echo '</select></td><td><input type="checkbox" name="' . esc_attr( $n ) . '[required]" value="1" ' . checked( ! empty( $f['required'] ), true, false ) . '></td><td><input type="checkbox" name="' . esc_attr( $n ) . '[public]" value="1" ' . checked( ! empty( $f['public'] ), true, false ) . '></td><td>' . ( $f['key'] ? '<input type="checkbox" name="' . esc_attr( $n ) . '[delete]" value="1">' : '' ) . '</td></tr>';
-		}
-		echo '</tbody></table></div><p class="mgm-muted">' . esc_html__( 'Fill in the last row to add a field. Save to add another.', 'mg-membership' ) . '</p><div class="mgm-savebar">';
-		submit_button( __( 'Save fields', 'mg-membership' ), 'primary mgm-btn-submit', 'submit', false );
-		echo '</div></form>';
-		MGM_Admin::footer();
-	}
-
-	public static function save_fields() {
-		if ( ! current_user_can( mgm_admin_cap() ) ) {
-			wp_die( esc_html__( 'Not allowed.', 'mg-membership' ) );
-		}
-		check_admin_referer( 'mgm_save_fields' );
-		$in    = isset( $_POST['fields'] ) ? (array) wp_unslash( $_POST['fields'] ) : array(); // phpcs:ignore
-		$out   = array();
-		// Reserved: WordPress profile keys and the core CSV import/export columns.
-		$taken = array( 'first_name', 'last_name', 'user_email', 'user_login', 'user_pass', 'description', 'nickname', 'email', 'username', 'membership', 'expires', 'user_id', 'name', 'active_memberships', 'lifetime_value', 'registered' );
-		foreach ( $in as $f ) {
-			$label = sanitize_text_field( $f['label'] ?? '' );
-			if ( '' === $label || ! empty( $f['delete'] ) ) {
-				continue;
-			}
-			$key = sanitize_key( $f['key'] ?? '' );
-			if ( '' === $key ) {
-				$key  = sanitize_key( str_replace( '-', '_', sanitize_title( $label ) ) );
-				$base = $key ? $key : 'field';
-				$key  = $base;
-				$i    = 2;
-				while ( in_array( $key, $taken, true ) || isset( $out[ $key ] ) ) {
-					$key = $base . '_' . $i++;
+	public static function users_columns( $cols ) {
+		$new = array();
+		foreach ( $cols as $k => $v ) {
+			$new[ $k ] = $v;
+			if ( 'email' === $k ) {
+				$new['mgm_memberships'] = __( 'Memberships', 'mg-membership' );
+				foreach ( self::fields() as $f ) {
+					if ( self::in_users_list( $f ) ) {
+						$new[ 'mgm_f_' . $f['key'] ] = $f['label'];
+					}
 				}
 			}
-			$type        = in_array( $f['type'] ?? '', self::TYPES, true ) ? $f['type'] : 'text';
-			$out[ $key ] = array(
-				'key'         => $key,
-				'label'       => $label,
-				'type'        => $type,
-				'options'     => sanitize_text_field( $f['options'] ?? '' ),
-				'required'    => empty( $f['required'] ) ? '' : '1',
-				'public'      => empty( $f['public'] ) ? '' : '1',
-				'show_on'     => in_array( $f['show_on'] ?? '', array( 'both', 'checkout', 'profile' ), true ) ? $f['show_on'] : 'both',
-				'placeholder' => sanitize_text_field( $f['placeholder'] ?? '' ),
-				'help'        => sanitize_text_field( $f['help'] ?? '' ),
-				'memberships' => mgm_int_list( $f['memberships'] ?? array() ),
-			);
 		}
-		update_option( 'mgm_custom_fields', array_values( $out ) );
-		wp_safe_redirect( admin_url( 'admin.php?page=mgm-fields&mgm_msg=' . rawurlencode( __( 'Fields saved.', 'mg-membership' ) ) ) );
-		exit;
+		return $new;
 	}
+
+	public static function users_column_value( $out, $col, $user_id ) {
+		if ( 'mgm_memberships' === $col ) {
+			$ids = MGM_Member::active_membership_ids( $user_id );
+			return $ids ? esc_html( implode( ', ', array_map( 'get_the_title', $ids ) ) ) : '<span aria-hidden="true">—</span>';
+		}
+		if ( 0 !== strpos( $col, 'mgm_f_' ) ) {
+			return $out;
+		}
+		$key = substr( $col, 6 );
+		foreach ( self::fields() as $f ) {
+			if ( $f['key'] !== $key ) {
+				continue;
+			}
+			$v = (string) mgm_get_member_field( $user_id, $key );
+			if ( '' === $v ) {
+				return '<span aria-hidden="true">—</span>';
+			}
+			if ( 'checkbox' === $f['type'] ) {
+				return esc_html__( 'Yes', 'mg-membership' );
+			}
+			if ( 'url' === $f['type'] ) {
+				return '<a href="' . esc_url( $v ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( preg_replace( '#^https?://#', '', $v ) ) . '</a>';
+			}
+			if ( 'date' === $f['type'] && strtotime( $v ) ) {
+				return esc_html( date_i18n( get_option( 'date_format' ), strtotime( $v ) ) );
+			}
+			return esc_html( wp_trim_words( $v, 12 ) );
+		}
+		return $out;
+	}
+
+	public static function users_sortable( $cols ) {
+		foreach ( self::fields() as $f ) {
+			if ( self::in_users_list( $f ) ) {
+				$cols[ 'mgm_f_' . $f['key'] ] = 'mgm_f_' . $f['key'];
+			}
+		}
+		return $cols;
+	}
+
+	public static function users_orderby( $query ) {
+		$by = $query->get( 'orderby' );
+		if ( ! is_admin() || ! is_string( $by ) || 0 !== strpos( $by, 'mgm_f_' ) ) {
+			return;
+		}
+		$key = sanitize_key( substr( $by, 6 ) );
+		if ( in_array( $key, wp_list_pluck( self::fields(), 'key' ), true ) ) {
+			$type = 'number' === ( array_column( self::fields(), 'type', 'key' )[ $key ] ?? '' ) ? 'NUMERIC' : 'CHAR';
+			// LEFT JOIN so members without an answer stay in the list.
+			$query->set(
+				'meta_query',
+				array(
+					'relation' => 'OR',
+					'mgm_sort' => array( 'key' => 'mgm_field_' . $key, 'compare' => 'EXISTS', 'type' => $type ),
+					array( 'key' => 'mgm_field_' . $key, 'compare' => 'NOT EXISTS' ),
+				)
+			);
+			$query->set( 'orderby', 'mgm_sort' );
+		}
+	}
+
 }
 
-MGM_Custom_Fields::init();

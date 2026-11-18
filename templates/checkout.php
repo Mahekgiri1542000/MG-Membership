@@ -44,23 +44,21 @@ $logged_in = $user && $user->ID;
 		<input type="hidden" name="mgm_membership_id" value="<?php echo (int) $membership->id; ?>">
 		<div class="mgm-hp" aria-hidden="true"><input type="text" name="mgm_website" tabindex="-1" autocomplete="off"></div>
 
-		<div class="mgm-row">
-			<p class="mgm-col"><label><?php esc_html_e( 'First name', 'mg-membership' ); ?></label>
-				<input type="text" name="first_name" value="<?php echo esc_attr( $logged_in ? $user->first_name : ( $_POST['first_name'] ?? '' ) ); // phpcs:ignore ?>"></p>
-			<p class="mgm-col"><label><?php esc_html_e( 'Last name', 'mg-membership' ); ?></label>
-				<input type="text" name="last_name" value="<?php echo esc_attr( $logged_in ? $user->last_name : ( $_POST['last_name'] ?? '' ) ); // phpcs:ignore ?>"></p>
-		</div>
+		<?php
+		// Fields, order, labels and widths: MG Membership → Forms & Fields → Registration.
+		MGM_Forms::render(
+			'checkout',
+			array(
+				'user'       => $logged_in ? $user : null,
+				'membership' => $membership,
+			)
+		);
+		?>
 
 		<?php if ( ! $logged_in ) : ?>
-			<p><label><?php esc_html_e( 'Email', 'mg-membership' ); ?> *</label>
-				<input type="email" name="user_email" required value="<?php echo esc_attr( sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) ) ); // phpcs:ignore ?>"></p>
-			<p><label><?php esc_html_e( 'Username', 'mg-membership' ); ?></label>
-				<input type="text" name="user_login" placeholder="<?php esc_attr_e( 'Optional – generated from email', 'mg-membership' ); ?>" value="<?php echo esc_attr( sanitize_user( wp_unslash( $_POST['user_login'] ?? '' ) ) ); // phpcs:ignore ?>"></p>
-			<div class="mgm-row">
-				<p class="mgm-col"><label><?php esc_html_e( 'Password', 'mg-membership' ); ?> *</label><input type="password" name="user_pass" required minlength="8" autocomplete="new-password"></p>
-				<p class="mgm-col"><label><?php esc_html_e( 'Confirm password', 'mg-membership' ); ?> *</label><input type="password" name="user_pass_confirm" required minlength="8" autocomplete="new-password"></p>
-			</div>
-			<p class="mgm-small"><?php printf( wp_kses_post( __( 'Already have an account? <a href="%s">Log in</a>', 'mg-membership' ) ), esc_url( add_query_arg( 'mgm_redirect', rawurlencode( $membership->url() ), mgm_page_url( 'login' ) ) ) ); ?></p>
+			<?php if ( MGM_Forms::on( 'checkout', 'login_link' ) ) : ?>
+				<p class="mgm-small"><?php printf( wp_kses_post( __( 'Already have an account? <a href="%s">Log in</a>', 'mg-membership' ) ), esc_url( add_query_arg( 'mgm_redirect', rawurlencode( $membership->url() ), mgm_page_url( 'login' ) ) ) ); ?></p>
+			<?php endif; ?>
 		<?php else : ?>
 			<p class="mgm-small"><?php printf( esc_html__( 'Signed in as %s', 'mg-membership' ), '<strong>' . esc_html( $user->user_email ) . '</strong>' ); ?></p>
 		<?php endif; ?>

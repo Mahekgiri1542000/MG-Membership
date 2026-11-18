@@ -57,11 +57,6 @@ class MGM_Addons {
 					'description' => __( 'Let a parent account purchase seats and invite sub-accounts that inherit the membership.', 'mg-membership' ),
 					'icon'        => 'dashicons-groups',
 				),
-				'custom-fields' => array(
-					'name'        => __( 'Custom Fields', 'mg-membership' ),
-					'description' => __( 'Add your own registration and profile fields (text, choices, dates, phone…), required or optional, with CSV export.', 'mg-membership' ),
-					'icon'        => 'dashicons-feedback',
-				),
 				'approval'      => array(
 					'name'        => __( 'Member Approval', 'mg-membership' ),
 					'description' => __( 'Hold new signups for selected memberships until an admin approves or denies them.', 'mg-membership' ),

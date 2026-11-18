@@ -49,7 +49,12 @@ class MGM_Admin {
 			return;
 		}
 		wp_enqueue_style( 'mgm-admin', MGM_URL . 'assets/css/admin.css', array(), MGM_VERSION );
-		wp_enqueue_script( 'mgm-admin', MGM_URL . 'assets/js/admin.js', array( 'jquery', 'jquery-ui-sortable' ), MGM_VERSION, true );
+		$deps = array( 'jquery', 'jquery-ui-sortable' );
+		if ( false !== strpos( $hook, 'mgm-settings' ) ) {
+			wp_enqueue_style( 'wp-color-picker' );
+			$deps[] = 'wp-color-picker';
+		}
+		wp_enqueue_script( 'mgm-admin', MGM_URL . 'assets/js/admin.js', $deps, MGM_VERSION, true );
 		if ( 'toplevel_page_mgm' === $hook ) {
 			wp_enqueue_style( 'mgm-dashboard', MGM_URL . 'assets/css/dashboard.css', array(), MGM_VERSION );
 			wp_enqueue_script( 'mgm-dashboard', MGM_URL . 'assets/js/dashboard.js', array(), MGM_VERSION, true );
@@ -200,6 +205,7 @@ class MGM_Admin {
 			'access'   => array( 'dashicons-lock', __( 'What visitors see on locked content', 'mg-membership' ) ),
 			'payments' => array( 'dashicons-money-alt', __( 'Stripe, PayPal and offline payments', 'mg-membership' ) ),
 			'emails'   => array( 'dashicons-email-alt', __( 'Sender details and email templates', 'mg-membership' ) ),
+			'appearance' => array( 'dashicons-admin-appearance', __( 'Colours, fonts, layout and account texts', 'mg-membership' ) ),
 		);
 		self::header(
 			__( 'Settings', 'mg-membership' ),
@@ -238,6 +244,7 @@ class MGM_Admin {
 			}
 			$sections[ $i ]['fields'][ $key ] = $f;
 		}
+		do_action( 'mgm_settings_before_fields', $current );
 		if ( 'payments' === $current && ! $sections ) {
 			echo '<div class="mgm-card"><p>' . esc_html__( 'No payment gateways are registered.', 'mg-membership' ) . '</p></div>';
 		}
@@ -248,7 +255,15 @@ class MGM_Admin {
 			}
 			echo '</div></section>';
 		}
+		do_action( 'mgm_settings_after_fields', $current );
 		echo '<div class="mgm-savebar"><span class="mgm-muted">' . esc_html__( 'Changes apply as soon as you save.', 'mg-membership' ) . '</span>';
+		if ( ! empty( $tabs[ $current ]['reset'] ) ) {
+			printf(
+				'<button type="submit" name="mgm_reset" value="1" class="button mgm-btn-reset" onclick="return confirm(&quot;%s&quot;);">%s</button> ',
+				esc_js( __( 'Reset every setting on this screen to its default?', 'mg-membership' ) ),
+				esc_html__( 'Reset to defaults', 'mg-membership' )
+			);
+		}
 		submit_button( __( 'Save changes', 'mg-membership' ), 'primary mgm-btn-submit', 'submit', false );
 		echo '</div></form></div>';
 		self::footer();
@@ -284,6 +299,12 @@ class MGM_Admin {
 			case 'textarea':
 				printf( '<textarea id="%s" name="%s" rows="5" class="large-text" placeholder="%s">%s</textarea>', esc_attr( $key ), $name, esc_attr( $f['placeholder'] ?? '' ), esc_textarea( $value ) ); // phpcs:ignore
 				break;
+			case 'code':
+				printf( '<textarea id="%s" name="%s" rows="10" class="large-text code mgm-code" spellcheck="false" placeholder="%s">%s</textarea>', esc_attr( $key ), $name, esc_attr( $f['placeholder'] ?? '' ), esc_textarea( $value ) ); // phpcs:ignore
+				break;
+			case 'color':
+				printf( '<input type="text" id="%s" name="%s" value="%s" class="mgm-color" data-default-color="%s" maxlength="7">', esc_attr( $key ), $name, esc_attr( $value ), esc_attr( $f['default'] ?? '' ) ); // phpcs:ignore
+				break;
 			case 'editor':
 				wp_editor( $value, $key, array( 'textarea_name' => 'mgm[' . $key . ']', 'textarea_rows' => 6, 'media_buttons' => false ) );
 				break;
@@ -306,6 +327,12 @@ class MGM_Admin {
 		$tabs   = MGM_Settings::fields();
 		$input  = isset( $_POST['mgm'] ) ? wp_unslash( $_POST['mgm'] ) : array(); // phpcs:ignore
 		$values = array();
+		// "Reset to defaults" (only on screens that allow it): forget every saved value of this screen.
+		if ( ! empty( $_POST['mgm_reset'] ) && ! empty( $tabs[ $tab ]['reset'] ) ) {
+			MGM_Settings::remove( array_keys( $tabs[ $tab ]['fields'] ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=mgm-settings&tab=' . $tab . '&mgm_msg=' . rawurlencode( __( 'Settings reset to defaults.', 'mg-membership' ) ) ) );
+			exit;
+		}
 		if ( isset( $tabs[ $tab ] ) ) {
 			foreach ( $tabs[ $tab ]['fields'] as $key => $f ) {
 				if ( 'heading' === $f['type'] || ! array_key_exists( $key, $input ) ) {
@@ -318,6 +345,12 @@ class MGM_Admin {
 						break;
 					case 'textarea':
 						$v = sanitize_textarea_field( $v );
+						break;
+					case 'code':
+						$v = MGM_Appearance::clean_css( (string) $v );
+						break;
+					case 'color':
+						$v = (string) sanitize_hex_color( trim( (string) $v ) );
 						break;
 					case 'checkbox':
 						$v = '1' === (string) $v ? '1' : '0';

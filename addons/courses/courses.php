@@ -572,7 +572,6 @@ class MGM_Courses {
 	}
 
 	public static function account_tab_content( $user ) {
-		echo '<h2>' . esc_html__( 'My Courses', 'mg-membership' ) . '</h2>';
 		echo mgm_get_template( 'courses/my-courses.php', array( 'user_id' => $user->ID ) ); // phpcs:ignore
 	}
 
@@ -581,8 +580,9 @@ class MGM_Courses {
 		if ( ! $courses ) {
 			return;
 		}
-		echo '<h3>' . esc_html__( 'Continue learning', 'mg-membership' ) . '</h3>';
+		echo '<section class="mgm-account-section"><h3 class="mgm-section-title">' . esc_html__( 'Continue learning', 'mg-membership' ) . '</h3>';
 		echo mgm_get_template( 'courses/my-courses.php', array( 'user_id' => $user->ID, 'limit' => 3 ) ); // phpcs:ignore
+		echo '</section>';
 	}
 }
 

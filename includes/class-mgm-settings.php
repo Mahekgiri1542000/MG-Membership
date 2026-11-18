@@ -21,6 +21,15 @@ class MGM_Settings {
 		update_option( 'mgm_settings', $opts );
 	}
 
+	/** Delete saved values so their defaults apply again. */
+	public static function remove( array $keys ) {
+		$opts = self::all();
+		foreach ( $keys as $k ) {
+			unset( $opts[ sanitize_key( $k ) ] );
+		}
+		update_option( 'mgm_settings', $opts );
+	}
+
 	/**
 	 * Settings tabs & fields, used to build the settings screen.
 	 */

@@ -146,7 +146,7 @@ class MGM_Checkout {
 			}
 			if ( strlen( $pass ) < 8 ) {
 				$errors->add( 'pass', __( 'Password must be at least 8 characters.', 'mg-membership' ) );
-			} elseif ( $pass !== $pass2 ) {
+			} elseif ( $pass !== $pass2 && MGM_Forms::visible( 'checkout', 'user_pass_confirm' ) ) {
 				$errors->add( 'pass', __( 'Passwords do not match.', 'mg-membership' ) );
 			}
 		}

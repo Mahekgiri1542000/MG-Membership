@@ -14,11 +14,10 @@ $rows = MGM_Transaction::query(
 	)
 );
 ?>
-<h2><?php esc_html_e( 'Payments', 'mg-membership' ); ?></h2>
 <?php if ( ! $rows ) : ?>
-	<p><?php esc_html_e( 'No payments yet.', 'mg-membership' ); ?></p>
+	<?php echo MGM_Account::empty_state( __( 'No payments yet', 'mg-membership' ), __( 'Your receipts will be listed here after your first payment.', 'mg-membership' ), '', '', 'payments' ); // phpcs:ignore ?>
 <?php else : ?>
-	<table class="mgm-table">
+	<div class="mgm-box mgm-box-flush"><table class="mgm-table">
 		<thead><tr><th><?php esc_html_e( 'Date', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Invoice #', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Membership', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Total', 'mg-membership' ); ?></th><th><?php esc_html_e( 'Status', 'mg-membership' ); ?></th><th></th></tr></thead>
 		<tbody>
 		<?php foreach ( $rows as $r ) : ?>
@@ -32,5 +31,5 @@ $rows = MGM_Transaction::query(
 			</tr>
 		<?php endforeach; ?>
 		</tbody>
-	</table>
+	</table></div>
 <?php endif; ?>

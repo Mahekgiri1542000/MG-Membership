@@ -48,6 +48,9 @@ final class MGM_Plugin {
 		require_once $inc . 'class-mgm-rest.php';
 		require_once $inc . 'class-mgm-security.php';
 		require_once $inc . 'class-mgm-privacy.php';
+		require_once $inc . 'class-mgm-appearance.php';
+		require_once $inc . 'class-mgm-custom-fields.php';
+		require_once $inc . 'class-mgm-forms.php';
 
 		require_once $inc . 'gateways/abstract-mgm-gateway.php';
 		require_once $inc . 'gateways/class-mgm-gateway-offline.php';
@@ -59,6 +62,7 @@ final class MGM_Plugin {
 			require_once $inc . 'admin/class-mgm-admin-dashboard.php';
 			require_once $inc . 'admin/class-mgm-admin-metaboxes.php';
 			require_once $inc . 'admin/class-mgm-admin-lists.php';
+			require_once $inc . 'admin/class-mgm-demo.php';
 		}
 	}
 
@@ -87,6 +91,9 @@ final class MGM_Plugin {
 		MGM_REST::init();
 		MGM_Security_Core::init();
 		MGM_Privacy::init();
+		MGM_Appearance::init();
+		MGM_Custom_Fields::init();
+		MGM_Forms::init();
 
 		// Add-ons (Courses, Events/Seminars, Coupons, Certificates, Reports, Page builders...).
 		MGM_Addons::load_active();
@@ -95,6 +102,7 @@ final class MGM_Plugin {
 			MGM_Admin::init();
 			MGM_Admin_Metaboxes::init();
 			MGM_Admin_Lists::init();
+			MGM_Demo::init();
 		}
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_assets' ) );

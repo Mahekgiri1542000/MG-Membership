@@ -148,7 +148,7 @@ class MGM_Groups {
 	}
 
 	public static function tab_content( $user ) {
-		echo '<h2>' . esc_html__( 'Team members', 'mg-membership' ) . '</h2>';
+		echo '<h3 class="mgm-section-title">' . esc_html__( 'Team members', 'mg-membership' ) . '</h3>';
 		foreach ( self::owned_groups( $user->ID ) as $mid ) {
 			$kids  = self::children( $user->ID, $mid );
 			$seats = self::seats( $mid );

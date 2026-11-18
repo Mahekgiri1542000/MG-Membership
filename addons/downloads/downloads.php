@@ -318,7 +318,7 @@ class MGM_Downloads {
 	}
 
 	public static function account_tab_content() {
-		echo '<h2>' . esc_html__( 'Downloads', 'mg-membership' ) . '</h2>' . self::sc_list(); // phpcs:ignore
+		echo self::sc_list(); // phpcs:ignore
 	}
 }
 
